@@ -4,7 +4,7 @@
 
 Name:		python-gmpy2
 Version:	2.2.1
-Release:	1
+Release:	2
 Source0:	https://files.pythonhosted.org/packages/source/g/gmpy2/%{module}-%{version}.tar.gz
 Summary:	General Multi-Precision arithmetic for Python 3+ (GMP, MPIR, MPFR, MPC)
 URL:		https://pypi.org/project/gmpy2/
