@@ -1,11 +1,11 @@
 %define module gmpy2
-%bcond_without tests
-%bcond_without docs
+%bcond tests 1
+%bcond docs 1
 
 Name:		python-gmpy2
-Version:	2.2.1
-Release:	3
-Source0:	https://files.pythonhosted.org/packages/source/g/gmpy2/%{module}-%{version}.tar.gz
+Version:	2.2.2
+Release:	1
+Source0:	https://files.pythonhosted.org/packages/source/g/gmpy2/%{module}-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Summary:	General Multi-Precision arithmetic for Python 3+ (GMP, MPIR, MPFR, MPC)
 URL:		https://pypi.org/project/gmpy2/
 License:	LGPL-3.0-or-later
@@ -15,13 +15,15 @@ BuildSystem:	python
 BuildRequires:	clang
 BuildRequires:	llvm
 BuildRequires:	make
-BuildRequires:	%{_lib}gmp-devel
-BuildRequires:	%{_lib}mpc-devel
+BuildRequires:	libmpc-devel
+BuildRequires:	pkgconfig(gmp)
+BuildRequires:	pkgconfig(gmpxx)
 BuildRequires:	pkgconfig(mpfr)
 BuildRequires:	pkgconfig(python)
 BuildRequires:	python >= 3.10
 BuildRequires:	python%{pyver}dist(pip)
 BuildRequires:	python%{pyver}dist(setuptools)
+BuildRequires:	python%{pyver}dist(setuptools-scm)
 BuildRequires:	python%{pyver}dist(wheel)
 %if %{with tests}
 BuildRequires:	python%{pyver}dist(pytest)
@@ -69,6 +71,7 @@ sed -e "s|\('https://docs\.python\.org/3/', \)None|\1'%{_docdir}/python-docs/obj
 
 %build
 export CFLAGS="%{optflags}"
+export LDFLAGS="%{ldflags} -lpython%{pyver}"
 %py_build
 
 # make html docs
@@ -86,8 +89,8 @@ pytest -v test/
 %endif
 
 %files
-%{python_sitearch}/gmpy2
-%{python_sitearch}/gmpy2-%{version}.dist-info
+%{python_sitearch}/%{module}
+%{python_sitearch}/%{module}-%{version}.dist-info
 %doc README.rst
 %license COPYING COPYING.LESSER
 
