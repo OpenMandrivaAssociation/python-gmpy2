@@ -3,7 +3,7 @@
 %bcond docs 1
 
 Name:		python-gmpy2
-Version:	2.2.2
+Version:	2.3.0
 Release:	1
 Source0:	https://files.pythonhosted.org/packages/source/g/gmpy2/%{module}-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Summary:	General Multi-Precision arithmetic for Python 3+ (GMP, MPIR, MPFR, MPC)
@@ -21,6 +21,7 @@ BuildRequires:	pkgconfig(gmpxx)
 BuildRequires:	pkgconfig(mpfr)
 BuildRequires:	pkgconfig(python)
 BuildRequires:	python >= 3.10
+BuildRequires:	python%{pyver}dist(packaging)
 BuildRequires:	python%{pyver}dist(pip)
 BuildRequires:	python%{pyver}dist(setuptools)
 BuildRequires:	python%{pyver}dist(setuptools-scm)
@@ -57,11 +58,12 @@ Provides:	bundled(js-jquery)
 Documentation for %{name}.
 
 #####################################
-%prep
-%autosetup -n %{module}-%{version}
-
-# remove egg-info
+%prep -a
+# Remove bundled egg-info
 rm -vrf %{module}.egg-info
+
+# Drop setuptools version <80 constraint
+sed -i 's|setuptools>=77,<80|setuptools>=77|g' pyproject.toml
 
 %if %{with docs}
 # Use local objects.inv for intersphinx
@@ -69,30 +71,37 @@ sed -e "s|\('https://docs\.python\.org/3/', \)None|\1'%{_docdir}/python-docs/obj
     -i docs/conf.py
 %endif
 
-%build
+%build -p
 export CFLAGS="%{optflags}"
 export LDFLAGS="%{ldflags} -lpython%{pyver}"
-%py_build
 
-# make html docs
-PYTHONPATH=$PWD/$(ls -1d build/lib.linux*) make -C docs html
+%install -a
+# The documentation needs to be built after the module is installed,
+# otherwise sphinx cannot find the modules meta info.
 
-%install
-%py_install
+# Make buildroot docdir
+install -dpm 755 %{buildroot}%{_docdir}/%{name}
+# Use sphinx-build to build html docs into buildroot docdir,
+# Doc generation requires the module to be installed in order to run successfully.
+PYTHONPATH="%{buildroot}%{python_sitearch}:${PWD}" \
+    sphinx-build -b html docs %{buildroot}%{_docdir}/%{name}
+# remove .buildinfo and .doctrees
+rm -rf %{buildroot}%{_docdir}/%{name}/.buildinfo
+rm -rf %{buildroot}%{_docdir}/%{name}/.doctrees
 
 %if %{with tests}
 %check
 export CI=true
 export PYTHONDONTWRITEBYTECODE=1
 export PYTHONPATH="%{buildroot}%{python_sitearch}:${PWD}"
-pytest -v test/
+pytest test/
 %endif
 
 %files
-%{python_sitearch}/%{module}
-%{python_sitearch}/%{module}-%{version}.dist-info
 %doc README.rst
 %license COPYING COPYING.LESSER
+%{python_sitearch}/%{module}
+%{python_sitearch}/%{module}-%{version}.dist-info
 
 %files doc
-%doc docs/_build/html/*
+%{_docdir}/%{name}
