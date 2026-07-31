@@ -3,7 +3,7 @@
 %bcond docs 1
 
 Name:		python-gmpy2
-Version:	2.3.0
+Version:	2.3.1
 Release:	1
 Source0:	https://files.pythonhosted.org/packages/source/g/gmpy2/%{module}-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Summary:	General Multi-Precision arithmetic for Python 3+ (GMP, MPIR, MPFR, MPC)
