@@ -3,7 +3,7 @@
 %bcond docs 1
 
 Name:		python-gmpy2
-Version:	2.3.1
+Version:	2.3.2
 Release:	1
 Source0:	https://files.pythonhosted.org/packages/source/g/gmpy2/%{module}-%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Summary:	General Multi-Precision arithmetic for Python 3+ (GMP, MPIR, MPFR, MPC)
@@ -19,7 +19,7 @@ BuildRequires:	libmpc-devel
 BuildRequires:	pkgconfig(gmp)
 BuildRequires:	pkgconfig(gmpxx)
 BuildRequires:	pkgconfig(mpfr)
-BuildRequires:	pkgconfig(python)
+BuildRequires:	pkgconfig(python3)
 BuildRequires:	python >= 3.10
 BuildRequires:	python%{pyver}dist(packaging)
 BuildRequires:	python%{pyver}dist(pip)
@@ -72,6 +72,7 @@ sed -e "s|\('https://docs\.python\.org/3/', \)None|\1'%{_docdir}/python-docs/obj
 %endif
 
 %build -p
+export SETUPTOOLS_SCM_PRETEND_VERSION=%{version}
 export CFLAGS="%{optflags}"
 export LDFLAGS="%{ldflags} -lpython%{pyver}"
 
